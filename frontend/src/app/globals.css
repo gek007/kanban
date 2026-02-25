@@ -1,0 +1,244 @@
+:root {
+  --accent-yellow: #ecad0a;
+  --blue-primary: #209dd7;
+  --purple-secondary: #753991;
+  --dark-navy: #032147;
+  --gray-text: #888888;
+  --surface: #ffffff;
+  --surface-soft: #f3f8ff;
+  --text-primary: #032147;
+  --column-width: 320px;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  color: var(--text-primary);
+  background:
+    radial-gradient(circle at 0% 0%, rgb(32 157 215 / 15%), transparent 35%),
+    radial-gradient(circle at 100% 100%, rgb(117 57 145 / 16%), transparent 38%),
+    linear-gradient(160deg, #eef5ff 0%, #fff 55%, #fff7df 100%);
+  font-family: "Gill Sans", "Trebuchet MS", "Verdana", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-shell {
+  padding: 1.5rem;
+}
+
+.app-header {
+  margin-bottom: 1.2rem;
+}
+
+.app-header h1 {
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  color: var(--dark-navy);
+  font-size: clamp(1.8rem, 2.2vw + 1rem, 2.9rem);
+}
+
+.eyebrow {
+  color: var(--gray-text);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.8rem;
+  margin-bottom: 0.35rem;
+}
+
+.board-wrapper {
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  animation: boardReveal 450ms ease-out;
+}
+
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(260px, var(--column-width)));
+  gap: 1rem;
+  min-width: min-content;
+}
+
+.column {
+  background: linear-gradient(180deg, #fff 0%, var(--surface-soft) 100%);
+  border-radius: 16px;
+  border-top: 3px solid var(--accent-yellow);
+  box-shadow: 0 12px 30px rgb(3 33 71 / 9%);
+  padding: 0.9rem;
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.column-title {
+  font-size: 1.02rem;
+  color: var(--dark-navy);
+  line-height: 1.2;
+}
+
+.rename-button {
+  border: 1px solid var(--blue-primary);
+  background: #fff;
+  color: var(--blue-primary);
+  border-radius: 999px;
+  padding: 0.24rem 0.55rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.title-input,
+.card-title-input,
+.card-details-input {
+  width: 100%;
+  border: 1px solid #c3d5ea;
+  border-radius: 10px;
+  padding: 0.55rem 0.65rem;
+  font: inherit;
+  color: var(--dark-navy);
+  background: #fff;
+}
+
+.title-input:focus,
+.card-title-input:focus,
+.card-details-input:focus,
+.rename-button:focus,
+.delete-button:focus,
+.submit-button:focus {
+  outline: 2px solid var(--blue-primary);
+  outline-offset: 2px;
+}
+
+.card-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 120px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid #d4e3f2;
+  border-left: 4px solid var(--blue-primary);
+  border-radius: 12px;
+  padding: 0.65rem;
+  box-shadow: 0 5px 12px rgb(3 33 71 / 8%);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.card h4 {
+  font-size: 0.95rem;
+  color: var(--dark-navy);
+  margin-bottom: 0.35rem;
+}
+
+.card p {
+  color: var(--gray-text);
+  font-size: 0.87rem;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgb(3 33 71 / 12%);
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.delete-button {
+  border: 1px solid #d8d8d8;
+  background: #fff;
+  color: #444;
+  border-radius: 8px;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+}
+
+.add-card-form {
+  margin-top: auto;
+  border-top: 1px solid #dfebf8;
+  padding-top: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.submit-button {
+  border: none;
+  background: var(--purple-secondary);
+  color: #fff;
+  border-radius: 9px;
+  padding: 0.54rem 0.7rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.submit-button:hover {
+  background: #632f7c;
+}
+
+.field-hint {
+  color: var(--gray-text);
+  font-size: 0.78rem;
+}
+
+.field-error {
+  color: #bd2d2d;
+  font-size: 0.78rem;
+}
+
+.is-dragging {
+  opacity: 0.7;
+  transform: rotate(1deg);
+}
+
+@keyframes boardReveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1024px) {
+  .board-grid {
+    grid-template-columns: repeat(5, minmax(250px, 290px));
+  }
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    padding: 1rem;
+  }
+
+  .column {
+    min-height: 460px;
+  }
+}
