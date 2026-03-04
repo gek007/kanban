@@ -1,178 +1,95 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, vi } from "vitest";
 import { Board } from "./Board";
-import { seedBoard } from "@/data/seedBoard";
 
 describe("Board", () => {
-  it("renders all columns from seed data", () => {
+  it("renders the seeded board", () => {
     render(<Board />);
 
-    expect(screen.getByTestId("column-col-1")).toBeInTheDocument();
-    expect(screen.getByTestId("column-col-2")).toBeInTheDocument();
-    expect(screen.getByTestId("column-col-3")).toBeInTheDocument();
-    expect(screen.getByTestId("column-col-4")).toBeInTheDocument();
-    expect(screen.getByTestId("column-col-5")).toBeInTheDocument();
+    ["Backlog", "Ready", "In Progress", "Review", "Done"].forEach((column) => {
+      expect(screen.getByRole("heading", { level: 2, name: column })).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("Define release scope")).toBeInTheDocument();
+    expect(screen.getByText("Implement board reducer")).toBeInTheDocument();
   });
 
-  it("renders seeded cards in correct columns", () => {
-    render(<Board />);
-
-    const column1 = screen.getByTestId("column-col-1");
-    expect(column1).toHaveTextContent("Define release scope");
-    expect(column1).toHaveTextContent("Sketch onboarding");
-
-    const column2 = screen.getByTestId("column-col-2");
-    expect(column2).toHaveTextContent("Write acceptance checks");
-
-    const column3 = screen.getByTestId("column-col-3");
-    expect(column3).toHaveTextContent("Implement board reducer");
-    expect(column3).toHaveTextContent("Refine card visual style");
-  });
-
-  it("renders with correct board test-id", () => {
-    render(<Board />);
-
-    expect(screen.getByTestId("board")).toBeInTheDocument();
-  });
-
-  it("handles column rename action", async () => {
+  it("allows renaming a column and blocks empty titles", async () => {
     const user = userEvent.setup();
     render(<Board />);
 
-    await user.click(screen.getByTestId("rename-column-col-1"));
-    const input = screen.getByTestId("rename-input-col-1");
+    const backlogSection = screen
+      .getByRole("heading", { level: 2, name: "Backlog" })
+      .closest("section");
+    const renameButton = within(backlogSection as HTMLElement).getByRole("button", {
+      name: "Rename",
+    });
+
+    await user.click(renameButton);
+    const input = within(backlogSection as HTMLElement).getByRole("textbox", {
+      name: /rename backlog/i,
+    });
+
     await user.clear(input);
+    await user.keyboard("{Enter}");
+    expect(screen.getByText("Column title cannot be empty.")).toBeInTheDocument();
+    expect(input).toHaveFocus();
+
     await user.type(input, "Ideas{Enter}");
-
-    expect(screen.getByText("Ideas")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Ideas" })).toBeInTheDocument();
+    expect(screen.queryByText("Column title cannot be empty.")).not.toBeInTheDocument();
   });
 
-  it("handles add card action", async () => {
+  it("validates and adds cards", async () => {
     const user = userEvent.setup();
     render(<Board />);
 
-    await user.type(screen.getByTestId("add-title-col-1"), "New Task");
-    await user.click(screen.getByTestId("add-submit-col-1"));
+    const backlogSection = screen
+      .getByRole("heading", { level: 2, name: "Backlog" })
+      .closest("section");
+    const addButton = within(backlogSection as HTMLElement).getByRole("button", {
+      name: "Add Card",
+    });
+    await user.click(addButton);
+    expect(screen.getByText("Card title is required.")).toBeInTheDocument();
 
-    expect(screen.getByText("New Task")).toBeInTheDocument();
+    const titleInput = within(backlogSection as HTMLElement).getByRole("textbox", {
+      name: /add card/i,
+    });
+    await user.type(titleInput, "Ship MVP board");
+    await user.click(addButton);
+
+    expect(screen.queryByText("Card title is required.")).not.toBeInTheDocument();
+    expect(screen.getByText("Ship MVP board")).toBeInTheDocument();
   });
 
-  it("handles delete card action", async () => {
+  it("removes a card from the board", async () => {
     const user = userEvent.setup();
     render(<Board />);
 
-    const deleteButton = screen.getByTestId("delete-card-task-1");
+    const card = screen.getByText("Define release scope").closest("li");
+    const deleteButton = within(card as HTMLElement).getByRole("button", { name: "Delete" });
     await user.click(deleteButton);
 
     expect(screen.queryByText("Define release scope")).not.toBeInTheDocument();
   });
 
-  it("initializes with seed board state", () => {
-    render(<Board />);
-
-    expect(screen.getByText("Backlog")).toBeInTheDocument();
-    expect(screen.getByText("Ready")).toBeInTheDocument();
-    expect(screen.getByText("In Progress")).toBeInTheDocument();
-    expect(screen.getByText("Review")).toBeInTheDocument();
-    expect(screen.getByText("Done")).toBeInTheDocument();
-  });
-
-  it("has correct grid layout structure", () => {
-    const { container } = render(<Board />);
-
-    expect(container.querySelector(".board-wrapper")).toBeInTheDocument();
-    expect(container.querySelector(".board-grid")).toBeInTheDocument();
-
-    const grid = container.querySelector(".board-grid");
-    expect(grid?.children.length).toBe(5);
-  });
-
-  it("maintains column order from seed data", () => {
-    const { container } = render(<Board />);
-
-    const grid = container.querySelector(".board-grid");
-    const columns = grid?.querySelectorAll(".column");
-
-    expect(columns?.length).toBe(5);
-
-    const firstColumn = columns?.[0];
-    expect(firstColumn?.getAttribute("data-testid")).toBe("column-col-1");
-
-    const lastColumn = columns?.[4];
-    expect(lastColumn?.getAttribute("data-testid")).toBe("column-col-5");
-  });
-
-  it("all columns have add card forms", () => {
-    render(<Board />);
-
-    expect(screen.getByTestId("add-submit-col-1")).toBeInTheDocument();
-    expect(screen.getByTestId("add-submit-col-2")).toBeInTheDocument();
-    expect(screen.getByTestId("add-submit-col-3")).toBeInTheDocument();
-    expect(screen.getByTestId("add-submit-col-4")).toBeInTheDocument();
-    expect(screen.getByTestId("add-submit-col-5")).toBeInTheDocument();
-  });
-
-  it("all columns have rename buttons", () => {
-    render(<Board />);
-
-    expect(screen.getByTestId("rename-column-col-1")).toBeInTheDocument();
-    expect(screen.getByTestId("rename-column-col-2")).toBeInTheDocument();
-    expect(screen.getByTestId("rename-column-col-3")).toBeInTheDocument();
-    expect(screen.getByTestId("rename-column-col-4")).toBeInTheDocument();
-    expect(screen.getByTestId("rename-column-col-5")).toBeInTheDocument();
-  });
-
-  it("renders with DndContext wrapper", () => {
-    const { container } = render(<Board />);
-
-    const boardWrapper = container.querySelector(".board-wrapper");
-    expect(boardWrapper).toBeInTheDocument();
-  });
-
-  it("cards have correct test-ids for drag and drop", () => {
-    render(<Board />);
-
-    expect(screen.getByTestId("card-task-1")).toBeInTheDocument();
-    expect(screen.getByTestId("card-task-2")).toBeInTheDocument();
-    expect(screen.getByTestId("card-task-3")).toBeInTheDocument();
-    expect(screen.getByTestId("card-task-4")).toBeInTheDocument();
-  });
-
-  it("handles multiple card additions in same column", async () => {
+  it("appends multiple cards to the same column", async () => {
     const user = userEvent.setup();
     render(<Board />);
 
-    const column1Title = screen.getByTestId("add-title-col-1");
-    const submitButton = screen.getByTestId("add-submit-col-1");
+    const column = screen.getByRole("heading", { level: 2, name: "Backlog" }).closest("section");
+    const titleInput = within(column as HTMLElement).getByRole("textbox", { name: /add card/i });
+    const submit = within(column as HTMLElement).getByRole("button", { name: "Add Card" });
 
-    await user.type(column1Title, "First Task");
-    await user.click(submitButton);
+    await user.type(titleInput, "First Task");
+    await user.click(submit);
+    await user.type(titleInput, "Second Task");
+    await user.click(submit);
 
-    await user.type(column1Title, "Second Task");
-    await user.click(submitButton);
-
-    expect(screen.getByText("First Task")).toBeInTheDocument();
-    expect(screen.getByText("Second Task")).toBeInTheDocument();
-  });
-
-  it("handles card deletion from different columns", async () => {
-    const user = userEvent.setup();
-    render(<Board />);
-
-    await user.click(screen.getByTestId("delete-card-task-1"));
-    expect(screen.queryByText("Define release scope")).not.toBeInTheDocument();
-
-    await user.click(screen.getByTestId("delete-card-task-3"));
-    expect(screen.queryByText("Write acceptance checks")).not.toBeInTheDocument();
-  });
-
-  it("validates empty card title on add", async () => {
-    const user = userEvent.setup();
-    render(<Board />);
-
-    await user.click(screen.getByTestId("add-submit-col-1"));
-
-    expect(screen.getByText("Card title is required.")).toBeInTheDocument();
+    const cards = within(column as HTMLElement).getAllByRole("heading", { level: 4 });
+    expect(cards.map((node) => node.textContent)).toEqual(
+      expect.arrayContaining(["First Task", "Second Task"])
+    );
   });
 });

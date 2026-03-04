@@ -1,14 +1,21 @@
+import { memo } from "react";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
 import type { Card, ColumnId } from "@/types/kanban";
 
+/**
+ * Props for the CardItem component
+ * @property card - The card data including id, title, and details
+ * @property columnId - The ID of the column this card belongs to
+ * @property onDelete - Callback function invoked when the delete button is clicked
+ */
 interface CardItemProps {
   card: Card;
   columnId: ColumnId;
   onDelete: (columnId: ColumnId, cardId: string) => void;
 }
 
-export function CardItem({ card, columnId, onDelete }: CardItemProps) {
+export const CardItem = memo(function CardItem({ card, columnId, onDelete }: CardItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({
       id: card.id,
@@ -18,7 +25,6 @@ export function CardItem({ card, columnId, onDelete }: CardItemProps) {
   return (
     <li
       ref={setNodeRef}
-      suppressHydrationWarning
       className={`card${isDragging ? " is-dragging" : ""}`}
       style={{
         transform: CSS.Transform.toString(transform),
@@ -29,7 +35,7 @@ export function CardItem({ card, columnId, onDelete }: CardItemProps) {
       {...listeners}
     >
       <h4>{card.title}</h4>
-      <p>{card.details}</p>
+      {card.details && <p>{card.details}</p>}
       <div className="card-actions">
         <button
           type="button"
@@ -43,4 +49,4 @@ export function CardItem({ card, columnId, onDelete }: CardItemProps) {
       </div>
     </li>
   );
-}
+});

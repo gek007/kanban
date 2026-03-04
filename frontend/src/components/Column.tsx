@@ -5,6 +5,14 @@ import { CardItem } from "@/components/CardItem";
 import { EditableColumnTitle } from "@/components/EditableColumnTitle";
 import type { BoardState, Column, ColumnId } from "@/types/kanban";
 
+/**
+ * Props for the Column component
+ * @property column - The column data including id, name, and card IDs
+ * @property cardsById - Map of all cards in the board for lookup by card ID
+ * @property onRename - Callback function invoked when the column is renamed
+ * @property onAddCard - Callback function invoked when a new card is added to the column
+ * @property onDeleteCard - Callback function invoked when a card is deleted from the column
+ */
 interface ColumnProps {
   column: Column;
   cardsById: BoardState["cards"];
@@ -33,16 +41,20 @@ export function Column({
           onSave={(name) => onRename(column.id, name)}
         />
       </header>
-      <SortableContext items={column.cardIds} strategy={verticalListSortingStrategy}>
+      <SortableContext items={column.cardIds ?? []} strategy={verticalListSortingStrategy}>
         <ul className="card-list">
-          {column.cardIds.map((cardId) => (
-            <CardItem
-              key={cardId}
-              card={cardsById[cardId]}
-              columnId={column.id}
-              onDelete={onDeleteCard}
-            />
-          ))}
+          {(column.cardIds ?? []).map((cardId) => {
+            const card = cardsById[cardId];
+            if (!card) return null;
+            return (
+              <CardItem
+                key={cardId}
+                card={card}
+                columnId={column.id}
+                onDelete={onDeleteCard}
+              />
+            );
+          })}
         </ul>
       </SortableContext>
       <AddCardForm

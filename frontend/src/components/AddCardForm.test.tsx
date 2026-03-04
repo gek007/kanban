@@ -48,6 +48,20 @@ describe("AddCardForm", () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
+  it("clears validation when the user types a title", async () => {
+    const user = userEvent.setup();
+    render(<AddCardForm columnId="col-1" onSubmit={vi.fn()} />);
+
+    const submit = screen.getByRole("button", { name: "Add Card" });
+    await user.click(submit);
+    expect(screen.getByText("Card title is required.")).toBeInTheDocument();
+
+    const titleInput = screen.getByPlaceholderText("Title");
+    await user.type(titleInput, "Valid title");
+
+    expect(screen.queryByText("Card title is required.")).not.toBeInTheDocument();
+  });
+
   it("clears form after successful submission", async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn();

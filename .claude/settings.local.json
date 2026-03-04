@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__ide__getDiagnostics",
+      "Bash(cd frontend:*)",
+      "Bash(cd:*)",
+      "Bash(taskkill:*)",
+      "Bash(tasklist:*)"
+    ]
+  }
+}

@@ -1,16 +1,38 @@
 import type { BoardAction, BoardState, ColumnId } from "@/types/kanban";
 
+/**
+ * Starting value for generated card IDs.
+ * Starts at 100 to avoid collision with seeded cards (task-1 through task-7).
+ */
 let generatedCardSequence = 100;
 
+/**
+ * Generates a unique ID for a new card
+ * @returns A unique card ID string
+ */
 function nextCardId() {
   generatedCardSequence += 1;
   return `task-generated-${generatedCardSequence}`;
 }
 
+/**
+ * Clamps a value between a minimum and maximum
+ * @param value - The value to clamp
+ * @param min - The minimum allowed value
+ * @param max - The maximum allowed value
+ * @returns The clamped value
+ */
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
+/**
+ * Moves an item from one index to another in an array
+ * @param items - The array to modify
+ * @param fromIndex - The index of the item to move
+ * @param toIndex - The destination index
+ * @returns A new array with the item moved
+ */
 function moveInArray<T>(items: T[], fromIndex: number, toIndex: number): T[] {
   const copy = [...items];
   const [item] = copy.splice(fromIndex, 1);
@@ -18,7 +40,13 @@ function moveInArray<T>(items: T[], fromIndex: number, toIndex: number): T[] {
   return copy;
 }
 
-function findColumnByCardId(state: BoardState, cardId: string): ColumnId | null {
+/**
+ * Finds the column ID that contains a specific card
+ * @param state - The current board state
+ * @param cardId - The card ID to search for
+ * @returns The column ID if found, null otherwise
+ */
+export function findColumnByCardId(state: BoardState, cardId: string): ColumnId | null {
   for (const columnId of state.columnOrder) {
     if (state.columns[columnId].cardIds.includes(cardId)) {
       return columnId;
@@ -27,6 +55,13 @@ function findColumnByCardId(state: BoardState, cardId: string): ColumnId | null 
   return null;
 }
 
+/**
+ * Pure reducer function that handles all board state mutations.
+ * Supports actions: renameColumn, addCard, deleteCard, moveCard
+ * @param state - The current board state
+ * @param action - The action to apply
+ * @returns The new board state
+ */
 export function boardReducer(state: BoardState, action: BoardAction): BoardState {
   switch (action.type) {
     case "renameColumn": {

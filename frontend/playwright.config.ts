@@ -5,12 +5,12 @@ export default defineConfig({
   fullyParallel: true,
   retries: 0,
   use: {
-    baseURL: "http://127.0.0.1:3000",
+    baseURL: "http://localhost:3000",
     trace: "on-first-retry",
   },
   webServer: {
-    command: "npm run dev",
-    url: "http://127.0.0.1:3000",
+    command: "npm run dev:webpack -- --hostname localhost",
+    url: "http://localhost:3000",
     reuseExistingServer: true,
     timeout: 120000,
   },
@@ -25,4 +25,3 @@ export default defineConfig({
     },
   ],
 });
-

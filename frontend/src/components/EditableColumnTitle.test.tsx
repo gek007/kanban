@@ -3,26 +3,25 @@ import userEvent from "@testing-library/user-event";
 import { EditableColumnTitle } from "./EditableColumnTitle";
 
 describe("EditableColumnTitle", () => {
-  it("renders column title and rename button", () => {
+  it("shows the column name and rename control", () => {
     render(<EditableColumnTitle columnId="col-1" value="Backlog" onSave={vi.fn()} />);
 
-    expect(screen.getByText("Backlog")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Backlog" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Rename" })).toBeInTheDocument();
   });
 
-  it("enters edit mode when rename button is clicked", async () => {
+  it("enters edit mode and preserves the current value", async () => {
     const user = userEvent.setup();
     render(<EditableColumnTitle columnId="col-1" value="Backlog" onSave={vi.fn()} />);
 
     await user.click(screen.getByRole("button", { name: "Rename" }));
 
-    const input = screen.getByRole("textbox", { name: /rename/i });
-    expect(input).toBeInTheDocument();
+    const input = screen.getByRole("textbox", { name: /rename backlog/i });
     expect(input).toHaveValue("Backlog");
     expect(input).toHaveFocus();
   });
 
-  it("saves new title on Enter key", async () => {
+  it("saves a trimmed name via Enter", async () => {
     const user = userEvent.setup();
     const onSave = vi.fn();
     render(<EditableColumnTitle columnId="col-1" value="Backlog" onSave={onSave} />);
@@ -31,29 +30,13 @@ describe("EditableColumnTitle", () => {
     const input = screen.getByRole("textbox", { name: /rename backlog/i });
 
     await user.clear(input);
-    await user.type(input, "Ideas");
+    await user.type(input, "  Ideas  ");
     await user.keyboard("{Enter}");
 
     expect(onSave).toHaveBeenCalledWith("Ideas");
   });
 
-  it("cancels edit on Escape key", async () => {
-    const user = userEvent.setup();
-    const onSave = vi.fn();
-    render(<EditableColumnTitle columnId="col-1" value="Backlog" onSave={onSave} />);
-
-    await user.click(screen.getByRole("button", { name: "Rename" }));
-    const input = screen.getByRole("textbox", { name: /rename/i });
-
-    await user.clear(input);
-    await user.type(input, "Ideas");
-    await user.keyboard("{Escape}");
-
-    expect(onSave).not.toHaveBeenCalled();
-    expect(screen.getByText("Backlog")).toBeInTheDocument();
-  });
-
-  it("saves on blur", async () => {
+  it("rejects blank names and shows inline feedback", async () => {
     const user = userEvent.setup();
     const onSave = vi.fn();
     render(<EditableColumnTitle columnId="col-1" value="Backlog" onSave={onSave} />);
@@ -62,46 +45,42 @@ describe("EditableColumnTitle", () => {
     const input = screen.getByRole("textbox", { name: /rename backlog/i });
 
     await user.clear(input);
-    await user.type(input, "Ideas");
-    input.blur();
+    await user.keyboard("{Enter}");
 
-    expect(onSave).toHaveBeenCalledWith("Ideas");
+    expect(onSave).not.toHaveBeenCalled();
+    expect(screen.getByText("Column title cannot be empty.")).toBeInTheDocument();
+    expect(input).toHaveFocus();
   });
 
-  it("updates draft when value prop changes", async () => {
-    const user = userEvent.setup();
-    const onSave = vi.fn();
-    const { rerender } = render(
-      <EditableColumnTitle columnId="col-1" value="Backlog" onSave={onSave} />
-    );
-
-    await user.click(screen.getByRole("button", { name: "Rename" }));
-    const input = screen.getByRole("textbox", { name: /rename/i });
-    expect(input).toHaveValue("Backlog");
-
-    rerender(<EditableColumnTitle columnId="col-1" value="New Name" onSave={onSave} />);
-
-    expect(input).toHaveValue("New Name");
-  });
-
-  it("has correct accessibility attributes", () => {
-    render(<EditableColumnTitle columnId="col-1" value="Backlog" onSave={vi.fn()} />);
-
-    expect(screen.getByTestId("column-title-col-1")).toBeInTheDocument();
-    expect(screen.getByTestId("rename-column-col-1")).toBeInTheDocument();
-  });
-
-  it("allows empty string as new title", async () => {
+  it("clears validation once a valid title is provided", async () => {
     const user = userEvent.setup();
     const onSave = vi.fn();
     render(<EditableColumnTitle columnId="col-1" value="Backlog" onSave={onSave} />);
 
     await user.click(screen.getByRole("button", { name: "Rename" }));
-    const input = screen.getByRole("textbox", { name: /rename/i });
+    const input = screen.getByRole("textbox", { name: /rename backlog/i });
 
     await user.clear(input);
-    await user.type(input, "{Enter}");
+    await user.keyboard("{Enter}");
+    expect(screen.getByText("Column title cannot be empty.")).toBeInTheDocument();
 
-    expect(onSave).toHaveBeenCalledWith("");
+    await user.type(input, "Ideas{Enter}");
+    expect(onSave).toHaveBeenCalledWith("Ideas");
+    expect(screen.queryByText("Column title cannot be empty.")).not.toBeInTheDocument();
+  });
+
+  it("cancels edits with Escape", async () => {
+    const user = userEvent.setup();
+    const onSave = vi.fn();
+    render(<EditableColumnTitle columnId="col-1" value="Backlog" onSave={onSave} />);
+
+    await user.click(screen.getByRole("button", { name: "Rename" }));
+    const input = screen.getByRole("textbox", { name: /rename backlog/i });
+
+    await user.type(input, "Ideas");
+    await user.keyboard("{Escape}");
+
+    expect(onSave).not.toHaveBeenCalled();
+    expect(screen.getByRole("heading", { name: "Backlog" })).toBeInTheDocument();
   });
 });

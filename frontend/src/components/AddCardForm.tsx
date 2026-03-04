@@ -1,5 +1,10 @@
 import { FormEvent, useState } from "react";
 
+/**
+ * Props for the AddCardForm component
+ * @property columnId - The unique identifier for the column where the card will be added
+ * @property onSubmit - Callback function invoked with the title and details when the form is submitted
+ */
 interface AddCardFormProps {
   columnId: string;
   onSubmit: (title: string, details: string) => void;
@@ -34,9 +39,21 @@ export function AddCardForm({ columnId, onSubmit }: AddCardFormProps) {
         placeholder="Title"
         value={title}
         maxLength={120}
-        onChange={(event) => setTitle(event.target.value)}
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? `card-title-error-${columnId}` : undefined}
+        onChange={(event) => {
+          const nextTitle = event.target.value;
+          setTitle(nextTitle);
+          if (error && nextTitle.trim()) {
+            setError("");
+          }
+        }}
       />
+      <label className="field-hint" htmlFor={`card-details-${columnId}`}>
+        Details (optional)
+      </label>
       <textarea
+        id={`card-details-${columnId}`}
         data-testid={`add-details-${columnId}`}
         className="card-details-input"
         placeholder="Details"
@@ -45,7 +62,11 @@ export function AddCardForm({ columnId, onSubmit }: AddCardFormProps) {
         rows={3}
         onChange={(event) => setDetails(event.target.value)}
       />
-      {error ? <p className="field-error">{error}</p> : null}
+      {error ? (
+        <p className="field-error" id={`card-title-error-${columnId}`}>
+          {error}
+        </p>
+      ) : null}
       <button
         className="submit-button"
         data-testid={`add-submit-${columnId}`}
@@ -56,4 +77,3 @@ export function AddCardForm({ columnId, onSubmit }: AddCardFormProps) {
     </form>
   );
 }
-

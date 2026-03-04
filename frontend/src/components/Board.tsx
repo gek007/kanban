@@ -1,34 +1,51 @@
 "use client";
 
-import { useMemo, useReducer } from "react";
+import { useReducer } from "react";
 import {
   DndContext,
+  KeyboardSensor,
   PointerSensor,
   closestCorners,
   useSensor,
   useSensors,
   type DragEndEvent,
 } from "@dnd-kit/core";
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { Column } from "@/components/Column";
 import { seedBoard } from "@/data/seedBoard";
-import { boardReducer } from "@/state/boardReducer";
+import { boardReducer, findColumnByCardId } from "@/state/boardReducer";
 import type { ColumnId } from "@/types/kanban";
 
-function getColumnByCardId(state: typeof seedBoard, cardId: string): ColumnId | null {
-  for (const columnId of state.columnOrder) {
-    if (state.columns[columnId].cardIds.includes(cardId)) {
-      return columnId;
-    }
-  }
-  return null;
+// Valid column IDs for validation
+const VALID_COLUMN_IDS: ReadonlyArray<string> = ["col-1", "col-2", "col-3", "col-4", "col-5"];
+
+/**
+ * Checks if a string is a valid ColumnId
+ * @param id - The string to validate
+ * @returns true if the string is a valid ColumnId
+ */
+function isValidColumnId(id: string): id is ColumnId {
+  return VALID_COLUMN_IDS.includes(id);
 }
 
+/**
+ * Board component that manages the Kanban board state and drag-and-drop functionality.
+ * Uses a pure reducer pattern for state management and @dnd-kit for drag-and-drop.
+ */
 export function Board() {
   const [state, dispatch] = useReducer(boardReducer, seedBoard);
-  const sensors = useSensors(useSensor(PointerSensor));
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
-  const cardIdSet = useMemo(() => new Set(Object.keys(state.cards)), [state.cards]);
+  const cardIdSet = new Set(Object.keys(state.cards));
 
+  /**
+   * Handles the end of a drag operation by calculating the source and destination
+   * of the dragged card and dispatching the appropriate moveCard action.
+   * @param event - The drag end event from @dnd-kit
+   */
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over) {
       return;
@@ -39,7 +56,7 @@ export function Board() {
       return;
     }
 
-    const fromColumnId = getColumnByCardId(state, activeCardId);
+    const fromColumnId = findColumnByCardId(state, activeCardId);
     if (!fromColumnId) {
       return;
     }
@@ -54,10 +71,15 @@ export function Board() {
     let toIndex = 0;
 
     if (overId.startsWith("column-drop-")) {
-      toColumnId = overId.replace("column-drop-", "") as ColumnId;
-      toIndex = state.columns[toColumnId].cardIds.length;
+      const extractedId = overId.replace("column-drop-", "");
+      if (isValidColumnId(extractedId)) {
+        toColumnId = extractedId;
+        toIndex = state.columns[toColumnId].cardIds.length;
+      } else {
+        return; // Invalid column ID, ignore the drag
+      }
     } else if (cardIdSet.has(overId)) {
-      toColumnId = getColumnByCardId(state, overId);
+      toColumnId = findColumnByCardId(state, overId);
       if (!toColumnId) {
         return;
       }
@@ -105,4 +127,3 @@ export function Board() {
     </DndContext>
   );
 }
-
