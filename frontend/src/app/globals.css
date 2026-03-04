@@ -148,14 +148,20 @@ a {
 }
 
 .card h4 {
+  font-family: var(--font-jakarta), "Gill Sans", sans-serif;
   font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--dark-navy);
   margin-bottom: 0.35rem;
 }
 
 .card p {
+  font-family: var(--font-jakarta), "Gill Sans", sans-serif;
   color: var(--gray-text);
-  font-size: 0.87rem;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  font-weight: 400;
 }
 
 .card:hover {

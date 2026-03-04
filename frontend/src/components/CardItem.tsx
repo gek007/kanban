@@ -18,6 +18,7 @@ export function CardItem({ card, columnId, onDelete }: CardItemProps) {
   return (
     <li
       ref={setNodeRef}
+      suppressHydrationWarning
       className={`card${isDragging ? " is-dragging" : ""}`}
       style={{
         transform: CSS.Transform.toString(transform),
