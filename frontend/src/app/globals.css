@@ -32,6 +32,19 @@ body {
   margin: 0;
 }
 
+/* Screen reader only content - visually hidden but accessible */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -43,6 +56,10 @@ a {
 
 .app-header {
   margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .app-header h1 {
@@ -246,5 +263,453 @@ a {
 
   .column {
     min-height: 460px;
+  }
+}
+
+/* Confirmation Dialog Styles */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 33, 71, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  animation: dialogFadeIn 150ms ease-out;
+}
+
+.dialog-container {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgb(3 33 71 / 20%);
+  max-width: 480px;
+  width: 100%;
+  animation: dialogSlideUp 200ms ease-out;
+}
+
+.dialog-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dialog-title {
+  font-family: var(--font-jakarta), "Gill Sans", sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--dark-navy);
+  margin: 0;
+}
+
+.dialog-message {
+  font-family: var(--font-jakarta), "Gill Sans", sans-serif;
+  font-size: 0.95rem;
+  color: var(--gray-text);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.dialog-button {
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: var(--font-jakarta), "Gill Sans", sans-serif;
+  cursor: pointer;
+  transition: all 150ms ease;
+  border: 1px solid transparent;
+}
+
+.dialog-button:focus {
+  outline: 2px solid var(--blue-primary);
+  outline-offset: 2px;
+}
+
+.dialog-button-cancel {
+  background: #fff;
+  border-color: #d4d4d4;
+  color: #444;
+}
+
+.dialog-button-cancel:hover {
+  background: #f5f5f5;
+  border-color: #b8b8b8;
+}
+
+.dialog-button-primary {
+  background: var(--blue-primary);
+  color: #fff;
+}
+
+.dialog-button-primary:hover {
+  background: #1a8ac4;
+}
+
+.dialog-button-danger {
+  background: #dc2626;
+  color: #fff;
+}
+
+.dialog-button-danger:hover {
+  background: #b91c1c;
+}
+
+@keyframes dialogFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialogSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .dialog-container {
+    max-width: 100%;
+  }
+
+  .dialog-content {
+    padding: 1.25rem;
+  }
+
+  .dialog-actions {
+    flex-direction: column-reverse;
+  }
+
+  .dialog-button {
+    width: 100%;
+  }
+}
+
+/* Error Boundary Styles */
+.error-boundary {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+}
+
+.error-boundary-content {
+  max-width: 500px;
+  width: 100%;
+  background: #fff;
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 20px 60px rgb(3 33 71 / 15%);
+  text-align: center;
+  animation: errorSlideUp 300ms ease-out;
+}
+
+.error-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.error-title {
+  font-family: var(--font-jakarta), "Gill Sans", sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--dark-navy);
+  margin: 0 0 1rem 0;
+}
+
+.error-message {
+  font-family: var(--font-jakarta), "Gill Sans", sans-serif;
+  font-size: 1rem;
+  color: var(--gray-text);
+  line-height: 1.6;
+  margin: 0 0 1.5rem 0;
+}
+
+.error-details {
+  margin: 1.5rem 0;
+  text-align: left;
+}
+
+.error-details summary {
+  cursor: pointer;
+  color: var(--blue-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  user-select: none;
+}
+
+.error-details summary:hover {
+  color: #1a8ac4;
+}
+
+.error-stack {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  overflow: auto;
+  font-family: "Courier New", monospace;
+  font-size: 0.85rem;
+  color: #495057;
+  line-height: 1.4;
+  max-height: 200px;
+}
+
+.error-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.error-button {
+  border-radius: 10px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: var(--font-jakarta), "Gill Sans", sans-serif;
+  cursor: pointer;
+  transition: all 150ms ease;
+  border: 2px solid transparent;
+}
+
+.error-button:focus {
+  outline: 2px solid var(--blue-primary);
+  outline-offset: 2px;
+}
+
+.error-button-primary {
+  background: var(--purple-secondary);
+  color: #fff;
+}
+
+.error-button-primary:hover {
+  background: #632f7c;
+}
+
+.error-button-secondary {
+  background: #fff;
+  border-color: #d4d4d4;
+  color: #444;
+}
+
+.error-button-secondary:hover {
+  background: #f5f5f5;
+  border-color: #b8b8b8;
+}
+
+@keyframes errorSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .error-boundary {
+    padding: 1rem;
+  }
+
+  .error-boundary-content {
+    padding: 1.75rem;
+  }
+
+  .error-title {
+    font-size: 1.5rem;
+  }
+
+  .error-actions {
+    flex-direction: column;
+  }
+
+  .error-button {
+    width: 100%;
+  }
+}
+
+/* Keyboard Shortcuts Help Styles */
+.keyboard-help-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  background: rgba(32, 157, 215, 0.1);
+  border: 1px solid var(--blue-primary);
+  border-radius: 8px;
+  color: var(--blue-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: var(--font-jakarta), "Gill Sans", sans-serif;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.keyboard-help-button:hover {
+  background: rgba(32, 157, 215, 0.2);
+}
+
+.keyboard-help-button:focus {
+  outline: 2px solid var(--blue-primary);
+  outline-offset: 2px;
+}
+
+.keyboard-help-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 33, 71, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  animation: dialogFadeIn 150ms ease-out;
+}
+
+.keyboard-help-dialog {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgb(3 33 71 / 20%);
+  max-width: 520px;
+  width: 100%;
+  animation: dialogSlideUp 200ms ease-out;
+}
+
+.keyboard-help-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.keyboard-help-title {
+  font-family: var(--font-jakarta), "Gill Sans", sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--dark-navy);
+  margin: 0;
+}
+
+.keyboard-help-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.keyboard-help-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.6rem;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.keyboard-shortcut-key kbd {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  min-width: 80px;
+  text-align: center;
+  background: #fff;
+  border: 1px solid #d4d4d4;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
+  font-family: "Courier New", monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--dark-navy);
+}
+
+.keyboard-shortcut-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.keyboard-shortcut-desc {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--dark-navy);
+  font-family: var(--font-jakarta), "Gill Sans", sans-serif;
+}
+
+.keyboard-shortcut-context {
+  font-size: 0.8rem;
+  color: var(--gray-text);
+  font-family: var(--font-jakarta), "Gill Sans", sans-serif;
+}
+
+.keyboard-help-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.keyboard-help-close {
+  padding: 0.6rem 1.5rem;
+  background: var(--purple-secondary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: var(--font-jakarta), "Gill Sans", sans-serif;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.keyboard-help-close:hover {
+  background: #632f7c;
+}
+
+.keyboard-help-close:focus {
+  outline: 2px solid var(--blue-primary);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .keyboard-help-button span:last-child {
+    display: none;
+  }
+
+  .keyboard-help-dialog {
+    max-width: 100%;
+  }
+
+  .keyboard-help-content {
+    padding: 1.25rem;
+  }
+
+  .keyboard-help-item {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .keyboard-shortcut-key kbd {
+    min-width: auto;
+    width: 100%;
   }
 }

@@ -5,7 +5,10 @@
       "Bash(cd frontend:*)",
       "Bash(cd:*)",
       "Bash(taskkill:*)",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(grep:*)"
     ]
   }
 }

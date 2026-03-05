@@ -1,10 +1,21 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import HomePage from "./page";
+import { AnnouncementProvider } from "@/hooks/useAnnouncement";
+
+// Wrapper function to provide the announcement context
+function PageWrapper({ children }: { children: React.ReactNode }) {
+  return <AnnouncementProvider>{children}</AnnouncementProvider>;
+}
 
 describe("kanban page", () => {
+  beforeEach(() => {
+    // Clear localStorage before each test to ensure fresh state
+    localStorage.clear();
+  });
+
   it("renders seeded columns and cards", () => {
-    render(<HomePage />);
+    render(<HomePage />, { wrapper: PageWrapper });
     expect(screen.getByText("Backlog")).toBeInTheDocument();
     expect(screen.getByText("Ready")).toBeInTheDocument();
     expect(screen.getByText("In Progress")).toBeInTheDocument();
@@ -15,7 +26,7 @@ describe("kanban page", () => {
 
   it("renames a column with enter", async () => {
     const user = userEvent.setup();
-    render(<HomePage />);
+    render(<HomePage />, { wrapper: PageWrapper });
     await user.click(screen.getByTestId("rename-column-col-1"));
     const input = screen.getByTestId("rename-input-col-1");
     await user.clear(input);
@@ -25,7 +36,7 @@ describe("kanban page", () => {
 
   it("validates and adds a card", async () => {
     const user = userEvent.setup();
-    render(<HomePage />);
+    render(<HomePage />, { wrapper: PageWrapper });
 
     await user.click(screen.getByTestId("add-submit-col-1"));
     expect(screen.getByText("Card title is required.")).toBeInTheDocument();
@@ -37,10 +48,17 @@ describe("kanban page", () => {
     expect(screen.getByText("Ship MVP board")).toBeInTheDocument();
   });
 
-  it("deletes a card from the board", () => {
-    render(<HomePage />);
+  it("deletes a card from the board after confirmation", async () => {
+    const user = userEvent.setup();
+    render(<HomePage />, { wrapper: PageWrapper });
+
     const deleteButton = screen.getByTestId("delete-card-task-1");
-    fireEvent.click(deleteButton);
+    await user.click(deleteButton);
+
+    // Confirm the dialog
+    const confirmButton = screen.getByTestId("dialog-confirm-button");
+    await user.click(confirmButton);
+
     expect(screen.queryByText("Define release scope")).not.toBeInTheDocument();
   });
 });

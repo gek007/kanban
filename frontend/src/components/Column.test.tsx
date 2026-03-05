@@ -2,6 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 import { Column } from "./Column";
+import { AnnouncementProvider } from "@/hooks/useAnnouncement";
 import type { BoardState, Column as ColumnType } from "@/types/kanban";
 
 const mockColumn: ColumnType = {
@@ -23,7 +24,17 @@ const mockCards: BoardState["cards"] = {
   },
 };
 
+// Wrapper function to provide the announcement context
+function ColumnWrapper({ children }: { children: React.ReactNode }) {
+  return <AnnouncementProvider>{children}</AnnouncementProvider>;
+}
+
 describe("Column", () => {
+  beforeEach(() => {
+    // Clear localStorage before each test
+    localStorage.clear();
+  });
+
   it("lists the provided cards", () => {
     render(
       <Column
@@ -32,7 +43,8 @@ describe("Column", () => {
         onRename={vi.fn()}
         onAddCard={vi.fn()}
         onDeleteCard={vi.fn()}
-      />
+      />,
+      { wrapper: ColumnWrapper }
     );
 
     expect(screen.getByRole("heading", { level: 2, name: "Backlog" })).toBeInTheDocument();
@@ -51,7 +63,8 @@ describe("Column", () => {
         onRename={onRename}
         onAddCard={vi.fn()}
         onDeleteCard={vi.fn()}
-      />
+      />,
+      { wrapper: ColumnWrapper }
     );
 
     await user.click(screen.getByRole("button", { name: "Rename" }));
@@ -73,7 +86,8 @@ describe("Column", () => {
         onRename={vi.fn()}
         onAddCard={onAddCard}
         onDeleteCard={vi.fn()}
-      />
+      />,
+      { wrapper: ColumnWrapper }
     );
 
     const column = screen.getByRole("heading", { level: 2, name: "Backlog" }).closest("section");
@@ -86,7 +100,7 @@ describe("Column", () => {
     expect(onAddCard).toHaveBeenCalledWith("col-1", "New Card", "");
   });
 
-  it("emits delete-card events", async () => {
+  it("emits delete-card events after confirmation", async () => {
     const user = userEvent.setup();
     const onDelete = vi.fn();
 
@@ -97,12 +111,17 @@ describe("Column", () => {
         onRename={vi.fn()}
         onAddCard={vi.fn()}
         onDeleteCard={onDelete}
-      />
+      />,
+      { wrapper: ColumnWrapper }
     );
 
     const firstCard = screen.getByText("First Task").closest("li");
-    const deleteButton = within(firstCard as HTMLElement).getByRole("button", { name: "Delete" });
+    const deleteButton = within(firstCard as HTMLElement).getByRole("button", { name: /delete/i });
     await user.click(deleteButton);
+
+    // Confirm the dialog
+    const confirmButton = screen.getByTestId("dialog-confirm-button");
+    await user.click(confirmButton);
 
     expect(onDelete).toHaveBeenCalledWith("col-1", "task-1");
   });
